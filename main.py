@@ -1,6 +1,8 @@
 import random
 from lxml import etree
 
+import tools
+
 WIDTH = 2500
 HEIGHT = 1080
 
@@ -29,188 +31,140 @@ MOON_PROBA = 0.2
 COLOR_PALETTE = ['#E5BEED', '#7D5C65', '#7C90DB', '#DA3E52', '#F2E94E']
 
 
-def sun_size(height):
-    return int(height * 0.75)
+def generate_background():
+    """
+    Fonction permettant d'ajouter un background
+    :return: etree.Element
+    """
+    background_group = etree.Element('g')
+    etree.SubElement(background_group, 'title').text = 'background'
+
+    background = etree.SubElement(background_group, 'rect', id='background')
+    background.set('x', '-1')
+    background.set('y', '-1')
+    background.set('width', str(WIDTH + 2))
+    background.set('height', str(HEIGHT + 2))
+
+    background.set('fill', '#000000')
+
+    return background_group
 
 
-def sun_x(height):
-    return int(height * (-0.358))  # calcul du ratio
+def generate_stars():
+    """
+    Fonction permettant d'ajouter des étoiles
+    :return: etree.Element
+    """
+    stars_group = etree.Element('g')
+    etree.SubElement(stars_group, 'title').text = 'stars'
+
+    for i in range(NB_STARS):
+        star_x = random.randint(0, WIDTH)
+        star_y = random.randint(0, HEIGHT)
+        star_size = random.randint(MIN_SIZE_STARS, MAX_SIZE_STARS)
+
+        star = etree.SubElement(stars_group, 'ellipse')
+        star.set('cx', str(star_x))
+        star.set('cy', str(star_y))
+        star.set('rx', str(star_size))
+        star.set('ry', str(star_size))
+
+        if random.random() < COLOR_PROBA:
+            color = random.choice(COLOR_PALETTE)
+        else:
+            color = '#000000'
+
+        star.set('fill', '{}'.format(color))
+        star.set('stroke', 'none')
+        star.set('fill-opacity', '{}'.format(random.random()))
+
+    return stars_group
 
 
-def calculate_pos_x(oax, oarx, obrx):
-    return oax + oarx + DISTANCE_PLANET + obrx
+def generate_sun():
+    """
+    Fonction permettant de créer un soleil
+    :return: etree.Element
+    """
+    sun_size = int(HEIGHT * 0.75)
+    sun_x = int(HEIGHT * (-0.358))  # TODO: Calcul du ratio
+    sun_y = int(HEIGHT / 2)
+
+    print(sun_size, sun_x, sun_y)  # Delete logs
+
+    sun_group = etree.Element('g')
+    etree.SubElement(sun_group, 'title').text = 'sun'
+    sun = etree.SubElement(sun_group, 'ellipse', id='sun')
+
+    sun.set('cx', str(sun_x))
+    sun.set('cy', str(sun_y))
+    sun.set('rx', str(sun_size))
+    sun.set('ry', str(sun_size))
+
+    sun.set('stroke-width', '2')
+    sun.set('fill', '#000000')
+    sun.set('stroke', '#ffffff')
+
+    return (sun_group, sun_x, sun_size)
 
 
-def calculate_pos_x2(oax, oarx, obrx):
-    return oax + oarx + DISTANCE_MOON + obrx
+def generate_moons():
+    pass
 
 
-def create_ring(cx, cy, ray):
-    rings = []
-    nb_rings = random.randint(MIN_RING, MAX_RING)
-    rotation_rings = random.randint(0, 360)
-    print(nb_rings)
-
-    for i in range(nb_rings):
-        cpt = i * 5
-        path = 'M{pos_x},{pos_y} a{distor},{distor2} 0 1,0 {ray},0'.format(pos_x=cx - ray, pos_y=cy - cpt,
-                                                                           distor=(2 * ray) + cpt, distor2=15 + cpt,
-                                                                           ray=2 * ray)
-
-        ring = etree.Element('path')
-        ring.set('d', path)
-        ring.set('fill', 'none')
-        ring.set('stroke', '#ffffff')
-        ring.set('stroke-width', '1.5')
-        ring.set('transform', 'rotate({} {},{})'.format(rotation_rings, cx, cy))
-        rings.append(ring)
-
-    return rings
+def generate_rings():
+    pass
 
 
-def get_first_position_x(cx, nb_moons):
-    total_size = 0
-    moons_dict = {}
-    moons = []
+def generate_planets(sun_pos_x, sun_size):
+    last_celestial = (sun_pos_x, sun_size)
+    planets = []
 
-    for i in range(nb_moons):
-        distance = i * DISTANCE_MOON
-        rand_size = random.randint(MIN_SIZE_MOON, MAX_SIZE_MOON)
-        total_size += rand_size + distance
+    for i in range(NB_PLANETS):
+        random_size = random.randint(MIN_SIZE_PLANET, MAX_SIZE_PLANET)
+        planet_x = tools.new_pos_x(last_celestial[0], last_celestial[1], random_size, DISTANCE_PLANET)
+        planet_y = int(HEIGHT / 2)
 
-        moons.append(rand_size)
+        # print(planet_x, planet_y)
 
-    moons_dict['first_pos_x'] = int(cx - (total_size / 2))
-    moons_dict['moons'] = moons
-    print(moons_dict)
+        planet_group = etree.Element('g')
+        etree.SubElement(planet_group, 'title').text = 'planet_{}'.format(i)
+        planet = etree.SubElement(planet_group, 'ellipse', id='planet_{}'.format(i))
 
-    return moons_dict
+        planet.set('cx', str(planet_x))
+        planet.set('cy', str(planet_y))
+        planet.set('rx', str(random_size))
+        planet.set('ry', str(random_size))
 
+        planet.set('fill', '#000000')
+        planet.set('stroke', '#ffffff')
+        planet.set('stroke-width', '2')
 
-def create_moons(cx, cy):
-    nb_moons = 2
-    moons_dict = get_first_position_x(cx, nb_moons)
-    previous_moon = (moons_dict['first_pos_x'] - moons_dict['moons'][0], moons_dict['moons'][0])
-    moons = []
+        # TODO: ADD RINGS
+        # TODO: ADD MOONS
+        # TODO: ADD NAMES
 
-    for moon in moons_dict['moons']:
-        moon_x = calculate_pos_x2(previous_moon[0], previous_moon[1], moon)
-        moon_y = int(0.75 * HEIGHT)
-        rand_moon_size = moon
+        planets.append(planet_group)
+        last_celestial = (planet_x, random_size)
 
-        print('MOON')
-        print(moon_x, moon_y, rand_moon_size)
-
-        moon = etree.Element('ellipse')
-        moon.set('id', 'moon')
-        moon.set('cx', str(moon_x))
-        moon.set('cy', str(moon_y))
-        moon.set('rx', str(rand_moon_size))
-        moon.set('ry', str(rand_moon_size))
-
-        moon.set('fill', '#000000')
-        moon.set('stroke', '#ffffff')
-        moon.set('stroke-width', '1.5')
-
-        moons.append(moon)
-
-        previous_moon = (moon_x, rand_moon_size)
-
-    return moons
+    return planets
 
 
-sun_size = sun_size(HEIGHT)
-sun_x = sun_x(HEIGHT)
-sun_y = int(HEIGHT / 2)
-print(sun_size, sun_x, sun_y)
+background_svg = generate_background()
+stars_svg = generate_stars()
+sun_svg, sun_x, sun_size = generate_sun()
+planets_list_svg = generate_planets(sun_x, sun_size)
 
 root = etree.Element('svg', width=str(WIDTH), height=str(HEIGHT), xmlns='http://www.w3.org/2000/svg')
 
-########## BACKGROUND
-background_group = etree.SubElement(root, 'g')
-title = etree.SubElement(background_group, 'title').text = 'background'
-rect = etree.SubElement(background_group, 'rect', x='-1', y='-1', width=str(WIDTH + 2), height=str(HEIGHT + 2),
-                        id='background', fill='#000000')
+root.append(background_svg)
+root.append(stars_svg)
+root.append(sun_svg)
 
-########## STARS
-stars_group = etree.SubElement(root, 'g')
-title = etree.SubElement(stars_group, 'title').text = 'stars'
-
-for i in range(NB_STARS):
-    star_x = random.randint(0, WIDTH)
-    star_y = random.randint(0, HEIGHT)
-    star_size = random.randint(MIN_SIZE_STARS, MAX_SIZE_STARS)
-
-    star = etree.SubElement(stars_group, 'ellipse')
-
-    star.set('cx', str(star_x))
-    star.set('cy', str(star_y))
-    star.set('rx', str(star_size))
-    star.set('ry', str(star_size))
-
-    if random.random() < COLOR_PROBA:
-        color = random.choice(COLOR_PALETTE)
-    else:
-        color = '#000000'
-
-    star.set('fill', '{}'.format(color))
-    star.set('stroke', 'none')
-    star.set('fill-opacity', '{}'.format(random.random()))
-
-########## STAR
-sun_group = etree.SubElement(root, 'g')
-title = etree.SubElement(sun_group, 'title').text = 'sun'
-
-sun = etree.SubElement(sun_group, 'ellipse', cx=str(sun_x), cy=str(sun_y), rx=str(sun_size), ry=str(sun_size), id='sun',
-                       fill='#000000', stroke='#ffffff')
-sun.set('stroke-width', '2')
-
-last_celestial = (sun_x, sun_size)
-
-########## PLANETS
-planets = []
-
-for i in range(NB_PLANETS):
-
-    planet_group = etree.Element('g')
-    title = etree.SubElement(planet_group, 'title').text = 'planet_{}'.format(i)
-
-    rand_size = random.randint(MIN_SIZE_PLANET, MAX_SIZE_PLANET)
-    planet_x = calculate_pos_x(last_celestial[0], last_celestial[1], rand_size)
-    planet_y = int(HEIGHT / 2)
-
-    print(planet_x, planet_y)
-
-    planet = etree.SubElement(planet_group, 'ellipse', id='planet_{}'.format(i))
-
-    planet.set('cx', str(planet_x))
-    planet.set('cy', str(planet_y))
-    planet.set('rx', str(rand_size))
-    planet.set('ry', str(rand_size))
-
-    planet.set('fill', '#000000')
-    planet.set('stroke', '#ffffff')
-    planet.set('stroke-width', '2')
-
-    if random.random() < RING_PROBA:
-        rings = create_ring(planet_x, planet_y, rand_size)
-        for ring in rings:
-            planet_group.append(ring)
-
-    if random.random() < MOON_PROBA:
-        for moon in create_moons(planet_x, planet_y):
-            planet_group.append(moon)
-
-    planets.append(planet_group)
-    last_celestial = (planet_x, rand_size)
-
-planets_group = etree.SubElement(root, 'g')
-title = etree.SubElement(planets_group, 'title').text = 'planets'
-
-for planet in planets:
-    planets_group.append(planet)
+for planet_svg in planets_list_svg:
+    root.append(planet_svg)
 
 ########## SAVING
 data = etree.tostring(root, pretty_print=True).decode('utf8')
-file_res = open('test.svg', 'w')
+file_res = open('solar_system.svg', 'w')
 file_res.write(data)
