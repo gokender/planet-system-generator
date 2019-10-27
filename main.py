@@ -1,9 +1,10 @@
 import random
+
 from lxml import etree
 
-import tools
+import utils
 
-WIDTH = 2500
+WIDTH = 2800
 HEIGHT = 1080
 
 NB_STARS = 1000
@@ -28,8 +29,9 @@ MAX_SIZE_MOON = 30
 DISTANCE_MOON = 15
 MOON_PROBA = 0.2
 
-COLOR_PALETTE = ['#E5BEED', '#7D5C65', '#7C90DB', '#DA3E52', '#F2E94E']
-
+# COLOR_PALETTE = ['#E5BEED', '#7D5C65', '#7C90DB', '#DA3E52', '#F2E94E']
+COLOR_PALETTE = ['#e57376', '#eba772', '#72b2f1', '#d3addf', '#aac6a6', '#d7ffda', '#e6d700']
+FONT_SIZE = 25
 
 def generate_background():
     """
@@ -105,24 +107,88 @@ def generate_sun():
     sun.set('fill', '#000000')
     sun.set('stroke', '#ffffff')
 
-    return (sun_group, sun_x, sun_size)
+    return sun_group, sun_x, sun_size
 
 
-def generate_moons():
-    pass
+def generate_moons(planet_cx):
+    moons = utils.random_size_moons()
+    diff_pos_moon = utils.total_size_moons(moons)
+    # moons = [20, 25, 30]
+    list_moons = []
+    last_moon = ()
+
+    cpt = 0
+    for moo in moons:
+        if cpt == 0:
+            moon_value = planet_cx - diff_pos_moon
+        else:
+            moon_value = utils.new_pos_x(last_moon[0], last_moon[1], moo, DISTANCE_MOON)
+
+        moon = etree.Element('ellipse', id='moon_{}'.format(cpt))
+        moon.set('cx', str(moon_value))
+        moon.set('cy', str(0.75 * HEIGHT))  # TODO: Change into ratio
+        moon.set('rx', str(moo))
+        moon.set('ry', str(moo))
+
+        moon.set('fill', '#000000')
+        moon.set('stroke', '#ffffff')
+        moon.set('stroke-width', '2')
+
+        list_moons.append(moon)
+        last_moon = (moon_value, moo)
+        cpt += 1
+
+    return list_moons
 
 
-def generate_rings():
-    pass
+def generate_rings(cx, cy, ray):
+    rings = []
+    nb_rings = random.randint(MIN_RING, MAX_RING)
+    rotation_rings = random.randint(0, 360)
+
+    for i in range(nb_rings):
+        cpt = i * 5
+        path = 'M{pos_x},{pos_y} a{distortion1},{distortion2} 0 1,0 {ray},0'.format(pos_x=cx - ray, pos_y=cy - cpt,
+                                                                                    distortion1=(2 * ray) + cpt,
+                                                                                    distortion2=15 + cpt,
+                                                                                    ray=2 * ray)
+        ring = etree.Element('path')
+        ring.set('d', path)
+        ring.set('fill', 'none')
+        ring.set('stroke', '#ffffff')
+        ring.set('stroke-width', '1.5')
+        ring.set('transform', 'rotate({} {},{})'.format(rotation_rings, cx, cy))
+        rings.append(ring)
+
+    return rings
 
 
-def generate_planets(sun_pos_x, sun_size):
-    last_celestial = (sun_pos_x, sun_size)
+def generate_names(planet_cx):
+    random_name = utils.random_name()
+    planet_name = etree.Element('text', id='planet_name')
+
+    planet_name.set('x', str(planet_cx))
+    planet_name.set('y', str(0.90 * HEIGHT))
+    planet_name.set('font-family', 'Helvetica')
+    planet_name.set('style', 'text-anchor: middle')
+    planet_name.set('font-size', str(FONT_SIZE))
+
+    planet_name.set('fill-opacity', 'null')
+    planet_name.set('fill', '#ffffff')
+    planet_name.set('stroke-width', '0')
+
+    planet_name.text = random_name
+
+    return planet_name
+
+
+def generate_planets(sun_pos_x, sun_size_r):
+    last_celestial = (sun_pos_x, sun_size_r)
     planets = []
 
     for i in range(NB_PLANETS):
         random_size = random.randint(MIN_SIZE_PLANET, MAX_SIZE_PLANET)
-        planet_x = tools.new_pos_x(last_celestial[0], last_celestial[1], random_size, DISTANCE_PLANET)
+        planet_x = utils.new_pos_x(last_celestial[0], last_celestial[1], random_size, DISTANCE_PLANET)
         planet_y = int(HEIGHT / 2)
 
         # print(planet_x, planet_y)
@@ -141,8 +207,16 @@ def generate_planets(sun_pos_x, sun_size):
         planet.set('stroke-width', '2')
 
         # TODO: ADD RINGS
+        if random.random() < RING_PROBA:
+            for ring_svg in generate_rings(planet_x, planet_y, random_size):
+                planet_group.append(ring_svg)
+
         # TODO: ADD MOONS
+        if random.random() < MOON_PROBA:
+            for moon_svg in generate_moons(planet_x):
+                planet_group.append(moon_svg)
         # TODO: ADD NAMES
+        planet_group.append(generate_names(planet_x))
 
         planets.append(planet_group)
         last_celestial = (planet_x, random_size)
