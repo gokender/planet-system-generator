@@ -1,18 +1,6 @@
-import configparser
 import random
 import string
-
-
-def get_config(filepath='config'):
-    """
-    Return the config file
-    :param filepath:  Path of the conf file
-    :return: ConfigParser object
-    """
-    config = configparser.ConfigParser()
-    config.read(filepath)
-    return config
-
+import os
 
 def new_pos_x(oa_cx, oa_rx, ob_rx, distance):
     """
@@ -26,12 +14,12 @@ def new_pos_x(oa_cx, oa_rx, ob_rx, distance):
     return oa_cx + oa_rx + distance + ob_rx
 
 
-def random_size_moons():
-    config = get_config()
-    min_nb_moons = int(config['MOONS']['min_nb_moons'])
-    max_nb_moons = int(config['MOONS']['max_nb_moons'])
-    min_size_moon = int(config['MOONS']['min_size_moon'])
-    max_size_moon = int(config['MOONS']['max_size_moon'])
+def random_size_moons(options):
+
+    min_nb_moons = options.min_nb_moons
+    max_nb_moons = options.max_nb_moons
+    min_size_moon = options.min_size_moon
+    max_size_moon = options.max_size_moon
 
     nb_moons = random.randint(min_nb_moons, max_nb_moons)
     moons = []
@@ -43,9 +31,9 @@ def random_size_moons():
     return moons
 
 
-def total_size_moons(moon_list):
-    config = get_config()
-    distance_moon = int(config['MOONS']['distance_moon'])
+def total_size_moons(moon_list, options):
+
+    distance_moon = options.distance_moon
 
     distance = (len(moon_list) - 1) * distance_moon
     moons_ls = [i * 2 for i in moon_list]
@@ -53,13 +41,13 @@ def total_size_moons(moon_list):
 
 
 def random_name():
-    with open('latin_names.txt', 'r') as infile:
+    with open(os.path.join('data', 'latin_names.txt'), 'r') as infile:
         data = infile.readlines()
     return random.choice(data).strip()
 
 
-def split_str(string, n):
-    return [string[i:i + n] for i in range(0, len(string), n)]
+def split_str(string_msg, n):
+    return [string_msg[i:i + n] for i in range(0, len(string_msg), n)]
 
 
 def generate_id(id_size, nb_id):

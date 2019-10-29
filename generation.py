@@ -4,14 +4,13 @@ from lxml import etree
 import utils
 
 
-def generate_background():
+def generate_background(options):
     """
     Fonction permettant d'ajouter un background
     :return: etree.Element
     """
-    config = utils.get_config()
-    width = int(config['DEFAULT']['width'])
-    height = int(config['DEFAULT']['height'])
+    width = options.width
+    height = options.height
 
     background_group = etree.Element('g')
     etree.SubElement(background_group, 'title').text = 'background'
@@ -27,20 +26,19 @@ def generate_background():
     return background_group
 
 
-def generate_stars():
+def generate_stars(options):
     """
     Fonction permettant d'ajouter des étoiles
     :return: etree.Element
     """
-    config = utils.get_config()
-    width = int(config['DEFAULT']['width'])
-    height = int(config['DEFAULT']['height'])
-    color_palette = config['DEFAULT']['color_palette']
+    width = options.width
+    height = options.height
+    color_palette = options.color_palette
 
-    nb_stars = int(config['STARS']['nb_stars'])
-    min_size_stars = int(config['STARS']['min_size_stars'])
-    max_size_stars = int(config['STARS']['max_size_stars'])
-    color_proba = float(config['STARS']['color_proba'])
+    nb_stars = options.nb_stars
+    min_size_stars = options.min_size_stars
+    max_size_stars = options.max_size_stars
+    color_proba = options.color_proba
 
     stars_group = etree.Element('g')
     etree.SubElement(stars_group, 'title').text = 'stars'
@@ -68,16 +66,15 @@ def generate_stars():
     return stars_group
 
 
-def generate_sun():
+def generate_sun(options):
     """
     Fonction permettant de créer un soleil
     :return: etree.Element
     """
-    config = utils.get_config()
-    height = int(config['DEFAULT']['height'])
+    height = options.height
 
     sun_size = int(height * 0.75)
-    sun_x = int(height * (-0.358))  # TODO: Calcul du ratio
+    sun_x = int(height * (-0.358))
     sun_y = int(height / 2)
 
     #print(sun_size, sun_x, sun_y)  # Delete logs
@@ -98,14 +95,13 @@ def generate_sun():
     return sun_group, sun_x, sun_size
 
 
-def generate_moons(planet_cx):
+def generate_moons(planet_cx, options):
 
-    config = utils.get_config()
-    height = int(config['DEFAULT']['height'])
-    distance_moon = int(config['MOONS']['distance_moon'])
+    height = options.height
+    distance_moon = options.distance_moon
 
-    moons = utils.random_size_moons()
-    diff_pos_moon = utils.total_size_moons(moons)
+    moons = utils.random_size_moons(options)
+    diff_pos_moon = utils.total_size_moons(moons, options)
     list_moons = []
     last_moon = ()
 
@@ -133,11 +129,10 @@ def generate_moons(planet_cx):
     return list_moons
 
 
-def generate_rings(cx, cy, ray):
+def generate_rings(cx, cy, ray, options):
 
-    config = utils.get_config()
-    min_ring = int(config['RINGS']['min_ring'])
-    max_ring = int(config['RINGS']['max_ring'])
+    min_ring = options.min_ring
+    max_ring = options.max_ring
 
     rings = []
     nb_rings = random.randint(min_ring, max_ring)
@@ -160,11 +155,10 @@ def generate_rings(cx, cy, ray):
     return rings
 
 
-def generate_names(planet_cx):
+def generate_names(planet_cx, options):
 
-    config = utils.get_config()
-    height = int(config['DEFAULT']['height'])
-    font_size = int(config['DEFAULT']['font_size'])
+    height = options.height
+    font_size = options.font_size
 
     random_name = utils.random_name()
     planet_name = etree.Element('text', id='planet_name')
@@ -184,22 +178,21 @@ def generate_names(planet_cx):
     return planet_name
 
 
-def generate_planets(sun_pos_x, sun_size_r, seed):
+def generate_planets(sun_pos_x, sun_size_r, options):
 
-    config = utils.get_config()
-    height = int(config['DEFAULT']['height'])
-    nb_planets = int(config['PLANETS']['nb_planets'])
-    min_size_planet = int(config['PLANETS']['min_size_planet'])
-    max_size_planet = int(config['PLANETS']['max_size_planet'])
-    distance_planet = int(config['PLANETS']['distance_planet'])
+    height = options.height
+    nb_planets = options.nb_planets
+    min_size_planet = options.min_size_planet
+    max_size_planet = options.max_size_planet
+    distance_planet = options.distance_planet
 
-    ring_proba = float(config['RINGS']['ring_proba'])
-    moon_proba = float(config['MOONS']['moon_proba'])
+    ring_proba = options.ring_proba
+    moon_proba = options.moon_proba
 
     last_celestial = (sun_pos_x, sun_size_r)
     planets = []
 
-    ls_seed = utils.split_str(seed, nb_planets)
+    ls_seed = utils.split_str(options.id, nb_planets)
 
     for i in range(nb_planets):
         random.seed(ls_seed[i])
@@ -223,14 +216,14 @@ def generate_planets(sun_pos_x, sun_size_r, seed):
         planet.set('stroke-width', '2')
 
         if random.random() < ring_proba:
-            for ring_svg in generate_rings(planet_x, planet_y, random_size):
+            for ring_svg in generate_rings(planet_x, planet_y, random_size, options):  # Adding rings to planets
                 planet_group.append(ring_svg)
 
         if random.random() < moon_proba:
-            for moon_svg in generate_moons(planet_x):
+            for moon_svg in generate_moons(planet_x, options):  # Adding moons to planets
                 planet_group.append(moon_svg)
 
-        planet_group.append(generate_names(planet_x)) #Add names to planet
+        planet_group.append(generate_names(planet_x, options))  # Adding name to planets
 
         planets.append(planet_group)
         last_celestial = (planet_x, random_size)
@@ -240,13 +233,12 @@ def generate_planets(sun_pos_x, sun_size_r, seed):
 
 def generate(options):
 
-    config = utils.get_config()
-    width = int(config['DEFAULT']['width'])
-    height = int(config['DEFAULT']['height'])
+    width = options.width
+    height = options.height
 
-    background_svg = generate_background()
-    stars_svg = generate_stars()
-    sun_svg, sun_x, sun_size = generate_sun()
+    background_svg = generate_background(options)
+    stars_svg = generate_stars(options)
+    sun_svg, sun_x, sun_size = generate_sun(options)
     planets_list_svg = generate_planets(sun_x, sun_size, options)
 
     root = etree.Element('svg', width=str(width), height=str(height), xmlns='http://www.w3.org/2000/svg')
@@ -258,7 +250,8 @@ def generate(options):
     for planet_svg in planets_list_svg:
         root.append(planet_svg)
 
-    ########## SAVING
     data = etree.tostring(root, pretty_print=True).decode('utf8')
-    file_res = open('solar_system.svg', 'w')
+    file_res = open(options.filename, 'w')
     file_res.write(data)
+    file_res.close()
+    print('SVG file saved : {}'.format(options.filename))

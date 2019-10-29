@@ -1,2 +1,2 @@
-lxml
-ConfigArgParse
+lxml==4.4.1
+ConfigArgParse==0.15.1

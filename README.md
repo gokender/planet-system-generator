@@ -1,36 +1,30 @@
 <!-- PROJECT SHIELDS -->
 <!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
-
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]-->
-
+[![MIT License][license-shield]][license-url]
 
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/Gokender/gokender.github.io">
+  <a href="">
     <img src="data/images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Planet System Generator</h3>
 
   <p align="center">
-    YOUR_SHORT_DESCRIPTION
+    Generate your own minimalist planetary system
     <br />
-    <a href="https://github.com/github_username/repo"><strong>Explore the docs »</strong></a>
+    <!--<a href="https://github.com/github_username/repo"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/github_username/repo">View Demo</a>
-    ·
+    · -->
     <a href="https://github.com/github_username/repo/issues">Report Bug</a>
     ·
     <a href="https://github.com/github_username/repo/issues">Request Feature</a>
@@ -45,7 +39,6 @@
 * [About the Project](#about-the-project)
   * [Built With](#built-with)
 * [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
 * [Roadmap](#roadmap)
@@ -59,19 +52,16 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![Screenshot][product-screenshot]
 
-Here's a blank template to get started:
-**To avoid retyping too much info. Do a search and replace with your text editor for the following:**
-`github_username`, `repo`, `twitter_handle`, `email`
+Planet System Generator is a program that generates small, minimal planetary systems. This project is inspired by the work of [erdavids](https://github.com/erdavids) with his work [Space Creator](https://github.com/erdavids/Space-Creator).
+
+Most of the variables used to generate the SVG file can be overload (more information in the [Usage](#usage) section).
 
 
 ### Built With
 
-* []()
-* []()
-* []()
-
+* [Python 3]()
 
 
 <!-- GETTING STARTED -->
@@ -79,23 +69,16 @@ Here's a blank template to get started:
 
 To get a local copy up and running follow these simple steps.
 
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-```sh
-npm install npm@latest -g
-```
 
 ### Installation
 
 1. Clone the repo
 ```sh
-git clone https://github.com/github_username/repo.git
+git clone https://gitlab.com/gauthier.chaty/planet-system-generator.git
 ```
-2. Install NPM packages
+2. Install PIP packages
 ```sh
-npm install
+pip install -r requirements.txt
 ```
 
 
@@ -103,11 +86,106 @@ npm install
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+To generate a planetary system :
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+```shell
+>> python planet_system.py
+Generating planetary system "zfeiu2jlhc7aixwnc4vb8tdid"
+SVG file saved : solar_system.svg
+```
+
+To generate a system with a known seed
+
+```shell
+>> python planet_system.py --id zfeiu2jlhc7aixwnc4vb8tdid
+Generating planetary system "zfeiu2jlhc7aixwnc4vb8tdid"
+SVG file saved : solar_system.svg
+```
+
+To change the size of the output SVG file :
+```shell
+>> python planet_system.py --width 3000 --height 1500
+Generating planetary system "4xitginbeugebs1kenupnj7ah"
+SVG file saved : solar_system.svg
+```
+
+If you don't want to change the variable one by one you can update the default configuration file `config.ini`
+
+Below the list of all variables you can change :
+
+```shell
+>> python planet_system.py --help
+usage: planet_system.py [-h] [--width WIDTH] [--height HEIGHT]
+                        [--color_palette COLOR_PALETTE]
+                        [--font_size FONT_SIZE] [--nb_stars NB_STARS]
+                        [--min_size_stars MIN_SIZE_STARS]
+                        [--max_size_stars MAX_SIZE_STARS]
+                        [--color_proba COLOR_PROBA] [--nb_planets NB_PLANETS]
+                        [--distance_planet DISTANCE_PLANET]
+                        [--min_size_planet MIN_SIZE_PLANET]
+                        [--max_size_planet MAX_SIZE_PLANET]
+                        [--ring_proba RING_PROBA] [--min_ring MIN_RING]
+                        [--max_ring MAX_RING] [--moon_proba MOON_PROBA]
+                        [--distance_moon DISTANCE_MOON]
+                        [--min_nb_moons MIN_NB_MOONS]
+                        [--max_nb_moons MAX_NB_MOONS]
+                        [--min_size_moon MIN_SIZE_MOON]
+                        [--max_size_moon MAX_SIZE_MOON] [--id ID]
+                        [-f FILENAME] [-v]
+
+Args that start with '--' (eg. --width) can also be set in a config file
+(config.ini). Config file syntax allows: key=value, flag=true, stuff=[a,b,c]
+(for details, see syntax at https://goo.gl/R74nmi). If an arg is specified in
+more than one place, then commandline values override config file values which
+override defaults.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --width WIDTH         SVG width
+  --height HEIGHT       SVG height
+  --color_palette COLOR_PALETTE
+                        list of colors for stars
+  --font_size FONT_SIZE
+                        font size for planet name
+  --nb_stars NB_STARS   number of stars
+  --min_size_stars MIN_SIZE_STARS
+                        minimal star size
+  --max_size_stars MAX_SIZE_STARS
+                        maximal star size
+  --color_proba COLOR_PROBA
+                        probability of coloured star
+  --nb_planets NB_PLANETS
+                        number of planets
+  --distance_planet DISTANCE_PLANET
+                        distance in pixel between each planet
+  --min_size_planet MIN_SIZE_PLANET
+                        minimal planet size
+  --max_size_planet MAX_SIZE_PLANET
+                        maximal planet size
+  --ring_proba RING_PROBA
+                        probability of a ringed planet
+  --min_ring MIN_RING   minimal number of rings
+  --max_ring MAX_RING   maximal number of rings
+  --moon_proba MOON_PROBA
+                        probability for a planet to have moons
+  --distance_moon DISTANCE_MOON
+                        distance between each moon
+  --min_nb_moons MIN_NB_MOONS
+                        minimal number of moon
+  --max_nb_moons MAX_NB_MOONS
+                        maximal number of moon
+  --min_size_moon MIN_SIZE_MOON
+                        minimal size of moon
+  --max_size_moon MAX_SIZE_MOON
+                        maximal size of moon
+  --id ID               random seed for generation
+  -f FILENAME, --filename FILENAME
+                        file name to save
+  -v, --version         show program's version number and exit
+```
 
 
+<!-- ROADMAP _For more examples, please refer to the [Documentation](https://example.com)_-->
 
 <!-- ROADMAP -->
 ## Roadmap
@@ -139,20 +217,17 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Gauthier Chaty - [@gokender](https://twitter.com/gokender) <!-- - gauthier.chaty@outlook.com -->
 
-Project Link: [https://github.com/github_username/repo](https://github.com/github_username/repo)
+Project Link: [Planet system generator](https://gitlab.com/gauthier.chaty/planet-system-generator.git)
 
 
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
-* []()
-* []()
-* []()
-
-
+* [erdavids](https://github.com/erdavids) for the inspiration
+* [Frostpizza](https://github.com/frostifru) for the advices
 
 
 
@@ -167,7 +242,5 @@ Project Link: [https://github.com/github_username/repo](https://github.com/githu
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: data/images/screenshot.png
+[license-url]: LICENSE.txt
+[product-screenshot]: /data/images/screenshot.png
