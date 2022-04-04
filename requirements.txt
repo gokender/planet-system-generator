@@ -1,2 +1,2 @@
-lxml==4.6.2
+lxml==4.6.5
 ConfigArgParse==0.15.1
